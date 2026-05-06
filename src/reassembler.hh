@@ -1,12 +1,14 @@
 #pragma once
 
 #include "byte_stream.hh"
+#include <map>
 
 class Reassembler
 {
 public:
   // Construct Reassembler to write into given ByteStream.
   explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ) {}
+  void set_error() {output_.set_error();}
 
   /*
    * Insert a new substring to be reassembled into a ByteStream.
@@ -43,4 +45,9 @@ public:
 
 private:
   ByteStream output_;
+  std::map<uint64_t, std::string> pending_ {};
+  uint64_t next_index_ = 0;
+  uint64_t last_index_ =2147483647;
+  bool try_push( Writer& my_writer, uint64_t first_index, std::string data );
+  void insert_pending(uint64_t first_index, std::string data);
 };
