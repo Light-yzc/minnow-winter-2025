@@ -1,17 +1,39 @@
-#include "socket.hh"
+#include "debug.hh"
+#include "tcp_minnow_socket.hh"
 
 #include <cstdlib>
 #include <iostream>
 #include <span>
 #include <string>
+#include <string_view>
 
 using namespace std;
 
+namespace {
 void get_URL( const string& host, const string& path )
 {
-  cerr << "Function called: get_URL(" << host << ", " << path << ")\n";
-  cerr << "Warning: get_URL() has not been implemented yet.\n";
+  debug( "Function called: get_URL( \"{}\", \"{}\" )", host, path );
+  CS144TCPSocket my_socket;
+  Address dest_addr(host, "http");
+  my_socket.connect(dest_addr);
+  std::string payload = "GET " + path + " HTTP/1.1\r\n"
+                        "Host: " + host + "\r\n"
+                        "Connection: close\r\n"
+                        "\r\n";
+  string_view remaining { payload };
+  while ( !remaining.empty() ) {
+    remaining.remove_prefix( my_socket.write( remaining ) );
+  }
+  std::string out_put;
+  while ( !my_socket.eof() )
+  {
+    my_socket.read(out_put);
+    cout << out_put;
+
+  }
+  my_socket.wait_until_closed();
 }
+} // namespace
 
 int main( int argc, char* argv[] )
 {
