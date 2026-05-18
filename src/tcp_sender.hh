@@ -5,7 +5,7 @@
 #include "tcp_sender_message.hh"
 
 #include <functional>
-
+#include <deque>
 class TCPSender
 {
 public:
@@ -42,4 +42,18 @@ private:
   ByteStream input_;
   Wrap32 isn_;
   uint64_t initial_RTO_ms_;
+  uint64_t cur_RTO {0};
+  uint64_t times_retransport {0};
+  uint64_t abs_ackno_ {0};
+  uint16_t window_size_ {1};
+  uint64_t next_seq_no_ {0};
+  bool SYN_send_ {false};
+  bool FIN_sed_ {false};
+  bool RST {false};
+  uint64_t acc_tick {0};
+  struct  Outstandingseg
+  {
+    TCPSenderMessage message;
+  };
+  std::deque<Outstandingseg> out_seg_que_ {};
 };
